@@ -204,6 +204,7 @@ export function createAppAPI<HostElement>(
 ): CreateAppFunction<HostElement> {
   return function createApp(rootComponent, rootProps = null) {
     if (!isFunction(rootComponent)) {
+      // covert to object, extend = Object.assign
       rootComponent = extend({}, rootComponent)
     }
 
@@ -215,15 +216,15 @@ export function createAppAPI<HostElement>(
     const context = createAppContext()
     const installedPlugins = new WeakSet()
 
-    let isMounted = false
+    let isMounted = false // used to mark the app as mounted.
 
     const app: App = (context.app = {
-      _uid: uid++,
-      _component: rootComponent as ConcreteComponent,
-      _props: rootProps,
-      _container: null,
-      _context: context,
-      _instance: null,
+      _uid: uid++, // app instance id
+      _component: rootComponent as ConcreteComponent, // root component
+      _props: rootProps, // root component props
+      _container: null, // app container
+      _context: context, // app context
+      _instance: null, // root component instance
 
       version,
 
@@ -239,8 +240,10 @@ export function createAppAPI<HostElement>(
         }
       },
 
+      // used to register a plugin
       use(plugin: Plugin, ...options: any[]) {
         if (installedPlugins.has(plugin)) {
+          // check if plugin has already been applied to target app.
           __DEV__ && warn(`Plugin has already been applied to target app.`)
         } else if (plugin && isFunction(plugin.install)) {
           installedPlugins.add(plugin)
@@ -273,6 +276,7 @@ export function createAppAPI<HostElement>(
         return app
       },
 
+      // register global component
       component(name: string, component?: Component): any {
         if (__DEV__) {
           validateComponentName(name, context.config)
@@ -287,6 +291,7 @@ export function createAppAPI<HostElement>(
         return app
       },
 
+      // register global directive
       directive(name: string, directive?: Directive) {
         if (__DEV__) {
           validateDirectiveName(name)
@@ -321,6 +326,9 @@ export function createAppAPI<HostElement>(
           // this will be set on the root instance on initial mount.
           vnode.appContext = context
 
+          /**
+           * @description not understand
+           */
           if (namespace === true) {
             namespace = 'svg'
           } else if (namespace === false) {
